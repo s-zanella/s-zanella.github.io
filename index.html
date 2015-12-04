@@ -3595,5 +3595,16 @@ timothy.wright@vodafone.com
 </div>
 
 <script src="annotator.min.js"></script>
+<script> 
+if (typeof annotator === 'undefined') { 
+  alert("Oops! it looks like you haven't built Annotator. " + 
+     "Either download a tagged release from GitHub, or build the " + 
+     "package by running `make`"); 
+} else { 
+  var app = new annotator.App(); 
+  app.include(annotator.ui.main); 
+  app.start(); 
+} 
+</script> 
 </body>
 </html>
