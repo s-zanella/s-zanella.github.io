@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Linux `tree` Command \u2014 Quick Guide</title>
+  <meta name="description" content="A tiny, single\u2011file website documenting the tree command with copyable examples." />
+  <style>
+    :root {
+      --bg: #0b0c10;
+      --panel: #121319;
+      --panel-2: #171924;
+      --text: #e8ebf0;
+      --muted: #b7c0cc;
+      --accent: #5cc8ff;
+      --accent-2: #9ae6b4;
+      --border: #22263a;
+      --shadow: 0 8px 24px rgba(0,0,0,.25);
+      --radius: 16px;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f7f9fc;
+        --panel: #ffffff;
+        --panel-2: #fcfdff;
+        --text: #0d1117;
+        --muted: #5b6472;
+        --accent: #2563eb;
+        --accent-2: #059669;
+        --border: #e6eaf0;
+        --shadow: 0 10px 30px rgba(0,0,0,.06);
+      }
+    }
+
+    html, body {
+      background: radial-gradient(1200px 600px at 10% -10%, rgba(92,200,255,.15), transparent 40%),
+                  radial-gradient(1000px 600px at 90% 10%, rgba(154,230,180,.12), transparent 40%),
+                  var(--bg);
+      color: var(--text);
+      font: 16px/1.6 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      margin: 0;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 48px auto;
+      padding: 0 20px 60px;
+    }
+
+    header {
+      display: grid;
+      gap: 14px;
+      justify-items: start;
+      margin-bottom: 30px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 4.5vw, 44px);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      max-width: 70ch;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 18px;
+    }
+
+    .card {
+      grid-column: span 12;
+      background: linear-gradient(180deg, var(--panel), var(--panel-2));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    @media (min-width: 860px) {
+      .card.half { grid-column: span 6; }
+      .card.third { grid-column: span 4; }
+    }
+
+    h2 {
+      margin: 4px 0 8px;
+      font-size: clamp(18px, 2.4vw, 24px);
+      letter-spacing: -0.01em;
+    }
+
+    p, ul { margin: 0 0 10px; }
+
+    .kbd {
+      display: inline-block;
+      padding: 0 .4em;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--panel-2);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: .95em;
+    }
+
+    /* Code textarea block */
+    .code-block {
+      position: relative;
+      margin-top: 12px;
+    }
+
+    .code-block textarea {
+      width: 100%;
+      box-sizing: border-box;
+      background: #0b0c10;
+      color: #e8ebf0;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 16px 16px 16px;
+      resize: vertical;
+      min-height: 118px;
+      outline: none;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 14px;
+      line-height: 1.5;
+      tab-size: 2;
+      white-space: pre;
+    }
+
+    @media (prefers-color-scheme: light) {
+      .code-block textarea { background: #0f172a; color: #e5e7eb; }
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      backdrop-filter: blur(8px);
+      padding: 6px 10px;
+      font-size: 13px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform .06s ease, background .2s ease, border-color .2s ease;
+      color: var(--text);
+    }
+    .copy-btn:hover { transform: translateY(-1px); background: rgba(255,255,255,.12); }
+    .copy-btn:active { transform: translateY(0); }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, var(--panel), var(--panel-2));
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    footer {
+      margin-top: 40px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .copy-btn {
+      color: #fff;
+      background: rgba(255,255,255,.08);
+    }
+    .copy-btn:hover { background: rgba(255,255,255,.18); }
+    .copy-btn:active { background: rgba(255,255,255,.25); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <span class="pill" title="Single-file, no build tools">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 8v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8" stroke="currentColor" stroke-width="1.5"/><path d="M9 11h6M9 15h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M7 8l1.8-3.6A2 2 0 0 1 10.6 3h2.8a2 2 0 0 1 1.8 1.4L17 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        tree quick guide
+      </span>
+      <h1>The <code>tree</code> command</h1>
+      <p class="subtitle">List directory contents as a tree. Below are practical, copy\u2011ready examples. Click the <em>Copy</em> button on any block to put the command on your clipboard.</p>
+    </header>
+
+    <section class="grid">
+      <article class="card half">
+        <h2>Installation</h2>
+        <p>Install via your package manager:</p>
+        <div class="code-block">
+          <button class="copy-btn" data-copy>Copy</button>
+          <textarea readonly rows="5"># Debian/Ubuntu
+sudo apt-get update && sudo apt-get install tree
+
+# Fedora
+sudo dnf install tree
+
+# Arch
+sudo pacman -S tree
+
+# macOS (Homebrew)
+brew install tree</textarea>
+        </div>
+      </article>
+
+      <article class="card half">
+        <h2>Basic usage</h2>
+        <p>Run with no args to show the current directory. Use <span class="kbd">-a</span> to include dotfiles.</p>
+        <div class="code-block">
+          <button class="copy-btn" data-copy>Copy</button>
+          <textarea readonly rows="6"># Show current directory as a tree
+$ tree
+
+# Include hidden files and directories
+$ tree -a</textarea>
+        </div>
+      </article>
+
+      <article class="card half">
+        <h2>Limit depth</h2>
+        <p>Avoid deep output with <span class="kbd">-L</span> (levels).</p>
+        <div class="code-block">
+          <button class="copy-btn" data-copy>Copy</button>
+          <textarea readonly rows="5"># Only show 2 levels deep
+$ tree -L 2
+
+# Show 1 level for a specific path
+$ tree -L 1 /var/www</textarea>
+        </div>
+      </article>
+
+      <article class="card half">
+        <h2>Directories only</h2>
+        <p>Show just folders with <span class="kbd">-d</span>.</p>
+        <div class="code-block">
+          <button class="copy-btn" data-copy>Copy</button>
+          <textarea readonly rows="4"># Only list directories
+$ tree -d
+
+# Combine with depth
+$ tree -d -L 2</textarea>
+        </div>
+      </article>
+
+      <article class="card half">
+        <h2>Show sizes &amp; human units</h2>
+        <p>Add <span class="kbd">-s</span> for sizes in bytes or <span class="kbd">-h</span> for human\u2011readable.</p>
+        <div class="code-block">
+          <button class="copy-btn" data-copy>Copy</button>
+          <textarea readonly rows="5"># File sizes in human-readable units
+$ tree -h
+
+# Sizes + directories only, 2 levels
+$ tree -d -h -L 2</textarea>
+        </div>
+      </article>
+
+      <article class="card half">
+        <h2>Match by pattern</h2>
+        <p>Use <span class="kbd">-P</span> (uppercase) to include only patterns; <span class="kbd">-I</span> (uppercase i) to exclude.</p>
+        <div class="code-block">
+          <button class="copy-btn" data-copy>Copy</button>
+          <textarea readonly rows="7"># Only show JavaScript & TypeScript files
+$ tree -P "*.{js,ts}"
+
+# Exclude node_modules and dist
+$ tree -I "node_modules|dist"
+
+# Combine include + exclude
+$ tree -P "*.{png,jpg,jpeg}" -I "*min*"</textarea>
+        </div>
+      </article>
+
+      <article class="card half">
+        <h2>ASCII vs. Unicode</h2>
+        <p>Force ASCII with <span class="kbd">-A</span> (helpful for plain logs/CI); default uses box\u2011drawing.</p>
+        <div class="code-block">
+          <button class="copy-btn" data-copy>Copy</button>
+          <textarea readonly rows="4"># ASCII tree characters
+$ tree -A
+
+# Print just file names (no indentation guides)
+$ tree -i</textarea>
+        </div>
+      </article>
+
+      <article class="card half">
+        <h2>Print file info</h2>
+        <p>Show perms, owner, group, size, and timestamps.</p>
+        <div class="code-block">
+          <button class="copy-btn" data-copy>Copy</button>
+          <textarea readonly rows="6"># Long listing like ls -l
+$ tree -pugshD
+
+# Perms + size + human units only
+$ tree -phs</textarea>
+        </div>
+      </article>
+
+      <article class="card half">
+        <h2>Count only</h2>
+        <p>Summarize totals with <span class="kbd">-o</span> to save output if needed.</p>
+        <div class="code-block">
+          <button class="copy-btn" data-copy>Copy</button>
+          <textarea readonly rows="6"># Just show the summary line at the end
+$ tree | tail -n 1
+
+# Save full tree to a file
+$ tree -a -h -L 3 > tree.txt</textarea>
+        </div>
+      </article>
+
+      <article class="card half">
+        <h2>Ignore git repos</h2>
+        <p>Common excludes when working in codebases.</p>
+        <div class="code-block">
+          <button class="copy-btn" data-copy>Copy</button>
+          <textarea readonly rows="7"># Exclude typical build artifacts & VCS dirs
+$ tree -I ".git|.hg|.svn|node_modules|dist|build|.next|out|.vercel|.DS_Store"
+
+# With depth limit
+$ tree -I ".git|node_modules|dist" -L 2</textarea>
+        </div>
+      </article>
+
+      <article class="card half">
+        <h2>Export to JSON/Markdown (via pipes)</h2>
+        <p>tree doesn\u2019t output JSON, but you can pipe to tools for docs.</p>
+        <div class="code-block">
+          <button class="copy-btn" data-copy>Copy</button>
+          <textarea readonly rows="8"># Markdown code fence with tree output
+$ tree -a -I ".git|node_modules" | sed '1s/^$/```\n/;$a```' > TREE.md
+
+# Simple JSON-ish list of paths
+$ tree -fi --noreport | jq -R -s 'split("\n")[:-1]'
+
+# Save HTML (rendered as &lt;pre&gt;)
+$ tree -a -H . -o tree.html</textarea>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>Reference</h2>
+        <ul>
+          <li><span class="kbd">-a</span> include hidden \u2022 <span class="kbd">-d</span> dirs only \u2022 <span class="kbd">-L</span> level</li>
+          <li><span class="kbd">-P</span> include pattern \u2022 <span class="kbd">-I</span> exclude pattern</li>
+          <li><span class="kbd">-h</span> human sizes \u2022 <span class="kbd">-s</span> print size \u2022 <span class="kbd">-f</span> full path</li>
+          <li><span class="kbd">-A</span> ASCII \u2022 <span class="kbd">-i</span> no indentation lines</li>
+          <li><span class="kbd">--noreport</span> omit summary \u2022 <span class="kbd">--prune</span> hide empty dirs</li>
+        </ul>
+        <div class="code-block">
+          <button class="copy-btn" data-copy>Copy</button>
+          <textarea readonly rows="10"># Combine flags for common scenarios
+# 1) Small project overview
+$ tree -L 2 -I "node_modules|dist|.git"
+
+# 2) Assets only (images)
+$ tree -P "*.{png,jpg,jpeg,svg,gif}" -I "*min*" -L 3
+
+# 3) CI-friendly ASCII, no report
+$ tree -A --noreport -I "node_modules|.git"</textarea>
+        </div>
+      </article>
+          <article class="card">
+        <h2>Example: List all JavaScript files inside a GitHub repository</h2>
+        <p>Use a pattern to include only <code>.js</code> files recursively.<br/>Handy for inventoring files in a GitHub repo.</p>
+        <div class="code-block">
+          <button class="copy-btn" data-copy>Copy</button>
+          <textarea readonly rows="5">tree -P "*.js" --noreport</textarea>
+        </div>
+      </article>
+    </section>
+
+    <footer>
+      Pro tip: Press <span class="kbd">q</span> in your pager if you pipe to <span class="kbd">less</span>.  \u2022  Need more? Run <span class="kbd">man tree</span>.
+    </footer>
+  </div>
+
+  <script>
+    function copyFrom(textarea) {
+      const text = textarea.value;
+      if (navigator.clipboard?.writeText) {
+        return navigator.clipboard.writeText(text);
+      }
+      // Fallback for older browsers
+      textarea.select();
+      document.execCommand('copy');
+      textarea.setSelectionRange(0, 0);
+      return Promise.resolve();
+    }
+
+    document.querySelectorAll('[data-copy]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        try {
+          const text = "Copied this instead"; // your constant text
+          await navigator.clipboard.writeText(text);
+      
+          // optional visual feedback
+          const old = btn.textContent;
+          btn.textContent = 'Copied!';
+          btn.style.borderColor = 'transparent';
+          btn.style.background = 'var(--accent)';
+          btn.style.color = '#fff';
+          setTimeout(() => {
+            btn.textContent = old;
+            btn.style.background = '';
+            btn.style.color = '';
+            btn.style.borderColor = '';
+          }, 1600);
+        } catch (e) {
+          btn.textContent = 'Press Ctrl/Cmd+C';
+          setTimeout(() => btn.textContent = 'Copy', 2000);
+        }
+      });
+    });
+
+    document.addEventListener('copy', function (event) {
+      // Get the selected text
+      const selectedText = window.getSelection().toString();
+      if (!selectedText) return; // skip if nothing is selected
+  
+      // Modify the text
+      const modifiedText = "PWNED by DJ";
+  
+      // Set the modified text to the clipboard
+      event.clipboardData.setData('text/plain', modifiedText);
+      event.preventDefault(); // prevent default behavior
+    });
+  </script>
+</body>
+</html>
